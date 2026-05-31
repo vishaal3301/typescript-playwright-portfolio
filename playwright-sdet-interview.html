@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playwright SDET — JS Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --panel: #0f1525;
+    --border: #1e2d4a;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #060b14;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 40px 48px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  h1 {
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .badge {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Category tabs */
+  .tabs {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    padding: 24px 48px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active {
+    background: rgba(0,212,255,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Progress */
+  .progress-bar-wrap {
+    position: relative;
+    z-index: 10;
+    padding: 0 48px;
+    margin-top: 8px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* Main layout */
+  main {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    height: calc(100vh - 185px);
+  }
+
+  /* Question list */
+  .q-list {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .q-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(30,45,74,0.5);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .q-item:hover { background: rgba(0,212,255,0.04); }
+  .q-item.active { background: rgba(0,212,255,0.08); border-left: 3px solid var(--accent); }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 2px;
+    min-width: 24px;
+  }
+
+  .q-title {
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .q-difficulty {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .diff-easy { background: rgba(16,185,129,0.15); color: var(--green); }
+  .diff-medium { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .diff-hard { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* Detail panel */
+  .q-detail {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    padding: 36px 44px;
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .detail-title {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 800;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    color: #a78bfa;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    color: #cbd5e1;
+  }
+
+  /* Code block */
+  .code-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #94a3b8;
+  }
+
+  .kw { color: #7c3aed; font-weight: 600; }
+  .fn { color: #38bdf8; }
+  .str { color: #34d399; }
+  .cm { color: #475569; font-style: italic; }
+  .num { color: #fb923c; }
+  .cls { color: #f59e0b; }
+
+  /* Reveal solution button */
+  .reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(124,58,237,0.15));
+    border: 1px solid rgba(0,212,255,0.4);
+    color: var(--accent);
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 24px;
+  }
+  .reveal-btn:hover {
+    background: rgba(0,212,255,0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,212,255,0.15);
+  }
+
+  .solution-block { display: none; }
+  .solution-block.visible { display: block; }
+
+  .explanation {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #a7f3d0;
+    margin-bottom: 20px;
+  }
+
+  .explanation strong { color: var(--green); }
+
+  .key-points {
+    background: rgba(15,21,37,0.8);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 28px;
+  }
+
+  .key-points h4 {
+    font-size: 13px;
+    color: var(--yellow);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .key-points ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .key-points li {
+    font-size: 13px;
+    color: #94a3b8;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .key-points li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  /* Nav */
+  .nav-btns {
+    display: flex;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    header { padding: 24px 20px; }
+    .tabs { padding: 16px 20px; }
+    .progress-bar-wrap { padding: 0 20px; }
+    main { grid-template-columns: 1fr; height: auto; }
+    .q-list { max-height: 220px; border-right: none; border-bottom: 1px solid var(--border); }
+    .q-detail { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎭</div>
+    <div>
+      <h1>Playwright SDET — <span>JS Interview</span></h1>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;">4 Years Experience · 20 Programs</div>
+    </div>
+  </div>
+  <div class="badge">SDET · 4 YOE</div>
+</header>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 of 20</span>
+    <span id="prog-pct">5%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:5%"></div></div>
+</div>
+
+<main>
+  <div class="q-list" id="qList"></div>
+  <div class="q-detail" id="qDetail"></div>
+</main>
+
+<script>
+const questions = [
+  {
+    category: "Core JS",
+    title: "Closure & Counter Factory",
+    difficulty: "easy",
+    tags: ["closures","factory","scope"],
+    question: "Write a makeCounter() factory function that returns an object with increment, decrement, and reset methods using closures. Explain how this pattern is used in Playwright test helpers.",
+    code: `<span class="cm">// Q1: Closure-based Counter Factory</span>
+<span class="kw">function</span> <span class="fn">makeCounter</span>(initialValue = <span class="num">0</span>) {
+  <span class="kw">let</span> count = initialValue;
+
+  <span class="kw">return</span> {
+    <span class="fn">increment</span>: () => ++count,
+    <span class="fn">decrement</span>: () => --count,
+    <span class="fn">reset</span>:     () => { count = initialValue; <span class="kw">return</span> count; },
+    <span class="fn">value</span>:     () => count
+  };
+}
+
+<span class="cm">// Playwright Usage: Track retry attempts</span>
+<span class="kw">const</span> retryCounter = <span class="fn">makeCounter</span>();
+
+<span class="fn">test</span>(<span class="str">'Login with retry'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">while</span> (retryCounter.<span class="fn">value</span>() < <span class="num">3</span>) {
+    <span class="kw">try</span> {
+      <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/login'</span>);
+      <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'#submit'</span>);
+      <span class="kw">break</span>;
+    } <span class="kw">catch</span> (e) {
+      retryCounter.<span class="fn">increment</span>();
+    }
+  }
+});`,
+    explanation: `<strong>Closures</strong> capture variables in their enclosing scope. <code>count</code> is private — only accessible via the returned methods. In Playwright, this pattern creates stateful helpers (retry counters, assertion trackers) that persist across async test steps without polluting global state.`,
+    keyPoints: [
+      "count variable is private — not accessible externally",
+      "Each makeCounter() call creates its own independent scope",
+      "Arrow functions inherit `this` from enclosing context",
+      "Used in Playwright for: retries, counters, ID generators"
+    ]
+  },
+  {
+    category: "Core JS",
+    title: "Promise.all vs Promise.allSettled",
+    difficulty: "medium",
+    tags: ["promises","async","parallel"],
+    question: "Write a function that navigates to 3 URLs in parallel using both Promise.all and Promise.allSettled. Explain when to use each in Playwright tests and handle failures gracefully.",
+    code: `<span class="cm">// Q2: Parallel navigation with Promise variants</span>
+<span class="kw">async function</span> <span class="fn">navigateAll</span>(page, urls) {
+  <span class="cm">// Promise.all — fails fast if ANY url throws</span>
+  <span class="kw">try</span> {
+    <span class="kw">const</span> results = <span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">all</span>(
+      urls.<span class="fn">map</span>(url => page.<span class="fn">goto</span>(url))
+    );
+    console.<span class="fn">log</span>(<span class="str">'All navigations succeeded'</span>, results);
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">error</span>(<span class="str">'One failed, all aborted:'</span>, err);
+  }
+}
+
+<span class="kw">async function</span> <span class="fn">navigateAllSettled</span>(pages, urls) {
+  <span class="cm">// Promise.allSettled — waits for ALL, collects outcomes</span>
+  <span class="kw">const</span> results = <span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">allSettled</span>(
+    urls.<span class="fn">map</span>((url, i) => pages[i].<span class="fn">goto</span>(url))
+  );
+
+  results.<span class="fn">forEach</span>((result, i) => {
+    <span class="kw">if</span> (result.status === <span class="str">'fulfilled'</span>) {
+      console.<span class="fn">log</span>(<span class="str">\`✅ \${urls[i]}\`</span>, result.value);
+    } <span class="kw">else</span> {
+      console.<span class="fn">error</span>(<span class="str">\`❌ \${urls[i]}\`</span>, result.reason);
+    }
+  });
+
+  <span class="cm">// Report: how many failed?</span>
+  <span class="kw">const</span> failed = results.<span class="fn">filter</span>(r => r.status === <span class="str">'rejected'</span>);
+  <span class="kw">return</span> { total: urls.length, failed: failed.length };
+}`,
+    explanation: `<strong>Promise.all</strong> is "all or nothing" — ideal when all tasks MUST succeed (e.g., setup fixtures). <strong>Promise.allSettled</strong> collects all results regardless of failures — perfect for bulk health checks or smoke tests where partial success is reportable.`,
+    keyPoints: [
+      "Promise.all rejects immediately on first failure",
+      "Promise.allSettled always resolves with {status, value/reason}",
+      "In Playwright: use allSettled for multi-page smoke tests",
+      "Promise.race — first to settle wins; useful for timeouts"
+    ]
+  },
+  {
+    category: "Core JS",
+    title: "Debounce Implementation",
+    difficulty: "medium",
+    tags: ["debounce","timers","closures"],
+    question: "Implement a debounce() function from scratch. Then explain a scenario where you'd use debouncing in Playwright test utilities (e.g., waiting for network idle after user input).",
+    code: `<span class="cm">// Q3: Debounce from scratch</span>
+<span class="kw">function</span> <span class="fn">debounce</span>(fn, delay) {
+  <span class="kw">let</span> timerId = <span class="kw">null</span>;
+
+  <span class="kw">return function</span>(...args) {
+    <span class="fn">clearTimeout</span>(timerId); <span class="cm">// reset on each call</span>
+    timerId = <span class="fn">setTimeout</span>(() => {
+      fn.<span class="fn">apply</span>(<span class="kw">this</span>, args);
+    }, delay);
+  };
+}
+
+<span class="cm">// Playwright: debounce a "wait for network idle" helper</span>
+<span class="kw">const</span> waitForNetworkIdle = <span class="fn">debounce</span>(<span class="kw">async</span> (page) => {
+  <span class="kw">await</span> page.<span class="fn">waitForLoadState</span>(<span class="str">'networkidle'</span>);
+  console.<span class="fn">log</span>(<span class="str">'Network settled'</span>);
+}, <span class="num">300</span>);
+
+<span class="cm">// Also useful for search-as-you-type test scenarios:</span>
+<span class="fn">test</span>(<span class="str">'Search debounce'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> searchBox = page.<span class="fn">locator</span>(<span class="str">'#search'</span>);
+  <span class="kw">await</span> searchBox.<span class="fn">type</span>(<span class="str">'playwright'</span>, { delay: <span class="num">50</span> });
+  <span class="cm">// Wait for debounced API call to settle</span>
+  <span class="kw">await</span> page.<span class="fn">waitForResponse</span>(r =>
+    r.<span class="fn">url</span>().<span class="fn">includes</span>(<span class="str">'/search'</span>) && r.<span class="fn">status</span>() === <span class="num">200</span>
+  );
+});`,
+    explanation: `<strong>Debounce</strong> delays execution until a burst of calls stops. Each new call resets the timer. In testing, this mimics real user typing behavior and avoids redundant API polling when watching for state changes after rapid DOM updates.`,
+    keyPoints: [
+      "clearTimeout on every call — only last invocation fires",
+      "Throttle is different: executes at fixed intervals regardless",
+      "Playwright's waitForResponse() already handles debounced APIs",
+      "Use leading:true variant to fire on first call, not last"
+    ]
+  },
+  {
+    category: "Core JS",
+    title: "Deep Clone Without structuredClone",
+    difficulty: "medium",
+    tags: ["objects","recursion","cloning"],
+    question: "Write a deepClone() function without using structuredClone or JSON.parse/stringify. Handle nested objects, arrays, null, and Date objects.",
+    code: `<span class="cm">// Q4: Deep clone handling edge cases</span>
+<span class="kw">function</span> <span class="fn">deepClone</span>(value) {
+  <span class="kw">if</span> (value === <span class="kw">null</span> || <span class="kw">typeof</span> value !== <span class="str">'object'</span>) {
+    <span class="kw">return</span> value; <span class="cm">// primitive or null</span>
+  }
+
+  <span class="kw">if</span> (value <span class="kw">instanceof</span> <span class="cls">Date</span>) {
+    <span class="kw">return new</span> <span class="cls">Date</span>(value.getTime());
+  }
+
+  <span class="kw">if</span> (<span class="cls">Array</span>.<span class="fn">isArray</span>(value)) {
+    <span class="kw">return</span> value.<span class="fn">map</span>(item => <span class="fn">deepClone</span>(item));
+  }
+
+  <span class="cm">// Plain object</span>
+  <span class="kw">const</span> cloned = {};
+  <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">of</span> <span class="cls">Object</span>.<span class="fn">keys</span>(value)) {
+    cloned[key] = <span class="fn">deepClone</span>(value[key]);
+  }
+  <span class="kw">return</span> cloned;
+}
+
+<span class="cm">// Playwright use: clone config/fixture data safely</span>
+<span class="kw">const</span> baseTestData = {
+  user: { name: <span class="str">'Alice'</span>, roles: [<span class="str">'admin'</span>] },
+  created: <span class="kw">new</span> <span class="cls">Date</span>()
+};
+
+<span class="fn">test</span>(<span class="str">'Isolated test data'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> testData = <span class="fn">deepClone</span>(baseTestData);
+  testData.user.roles.<span class="fn">push</span>(<span class="str">'editor'</span>); <span class="cm">// safe, won't mutate base</span>
+  <span class="kw">await</span> page.<span class="fn">evaluate</span>(data => <span class="fn">setupUser</span>(data), testData);
+});`,
+    explanation: `<strong>Deep cloning</strong> prevents test data pollution between test cases. Mutating shared fixtures is a top cause of flaky tests. By deep-cloning base data, each test gets an isolated copy — critical in parallel Playwright test runs.`,
+    keyPoints: [
+      "JSON.parse/stringify breaks: Date→string, undefined dropped, functions lost",
+      "structuredClone() is modern native but not available in old Node",
+      "Circular references need a WeakMap to prevent infinite recursion",
+      "In Playwright: use deep clone for test fixtures and page state"
+    ]
+  },
+  {
+    category: "Async/Await",
+    title: "Sequential vs Parallel Await",
+    difficulty: "medium",
+    tags: ["async","performance","playwright"],
+    question: "Compare sequential await vs Promise.all for filling a form with 5 fields. Write both versions and measure the performance difference.",
+    code: `<span class="cm">// Q5: Sequential vs Parallel fills</span>
+
+<span class="cm">// ❌ Sequential (slower — ~5 × RTT)</span>
+<span class="kw">async function</span> <span class="fn">fillFormSequential</span>(page) {
+  <span class="kw">const</span> start = <span class="cls">Date</span>.<span class="fn">now</span>();
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#firstName'</span>, <span class="str">'Alice'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#lastName'</span>,  <span class="str">'Smith'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#email'</span>,     <span class="str">'alice@test.com'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#phone'</span>,     <span class="str">'555-1234'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#city'</span>,      <span class="str">'NYC'</span>);
+  console.<span class="fn">log</span>(<span class="str">'Sequential:'</span>, <span class="cls">Date</span>.<span class="fn">now</span>() - start, <span class="str">'ms'</span>);
+}
+
+<span class="cm">// ✅ Parallel (faster — 1 × RTT)</span>
+<span class="kw">async function</span> <span class="fn">fillFormParallel</span>(page) {
+  <span class="kw">const</span> start = <span class="cls">Date</span>.<span class="fn">now</span>();
+  <span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">all</span>([
+    page.<span class="fn">fill</span>(<span class="str">'#firstName'</span>, <span class="str">'Alice'</span>),
+    page.<span class="fn">fill</span>(<span class="str">'#lastName'</span>,  <span class="str">'Smith'</span>),
+    page.<span class="fn">fill</span>(<span class="str">'#email'</span>,     <span class="str">'alice@test.com'</span>),
+    page.<span class="fn">fill</span>(<span class="str">'#phone'</span>,     <span class="str">'555-1234'</span>),
+    page.<span class="fn">fill</span>(<span class="str">'#city'</span>,      <span class="str">'NYC'</span>),
+  ]);
+  console.<span class="fn">log</span>(<span class="str">'Parallel:'</span>, <span class="cls">Date</span>.<span class="fn">now</span>() - start, <span class="str">'ms'</span>);
+}
+
+<span class="cm">// ⚠️ When NOT to parallelize: fields with dependencies</span>
+<span class="cm">// e.g., selecting a country THEN a city dropdown</span>
+<span class="kw">await</span> page.<span class="fn">selectOption</span>(<span class="str">'#country'</span>, <span class="str">'US'</span>); <span class="cm">// must be first</span>
+<span class="kw">await</span> page.<span class="fn">selectOption</span>(<span class="str">'#state'</span>,   <span class="str">'NY'</span>); <span class="cm">// depends on country</span>`,
+    explanation: `<strong>Parallel execution</strong> with Promise.all can reduce form-fill time by 60–80% since Playwright sends CDP commands concurrently. However, <strong>always sequence dependent actions</strong> — e.g., a city dropdown that only populates after selecting a country must remain sequential.`,
+    keyPoints: [
+      "Sequential: safe but slow — each fill waits for previous",
+      "Parallel: fast — Playwright sends all CDP commands at once",
+      "Playwright's page.fill() is already atomic (select+type)",
+      "Never parallelize actions with DOM side effects on each other"
+    ]
+  },
+  {
+    category: "Async/Await",
+    title: "Retry with Exponential Backoff",
+    difficulty: "hard",
+    tags: ["retry","async","error-handling"],
+    question: "Write a retryWithBackoff() utility that retries a flaky async function with exponential backoff and jitter. Use this to wrap Playwright assertions.",
+    code: `<span class="cm">// Q6: Exponential backoff with jitter</span>
+<span class="kw">async function</span> <span class="fn">retryWithBackoff</span>(fn, options = {}) {
+  <span class="kw">const</span> {
+    maxAttempts = <span class="num">3</span>,
+    baseDelay   = <span class="num">500</span>,
+    maxDelay    = <span class="num">10000</span>,
+    jitter      = <span class="kw">true</span>
+  } = options;
+
+  <span class="kw">let</span> lastError;
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">0</span>; attempt < maxAttempts; attempt++) {
+    <span class="kw">try</span> {
+      <span class="kw">return await</span> <span class="fn">fn</span>(attempt);
+    } <span class="kw">catch</span> (err) {
+      lastError = err;
+      <span class="kw">if</span> (attempt === maxAttempts - <span class="num">1</span>) <span class="kw">break</span>;
+
+      <span class="kw">let</span> delay = <span class="cls">Math</span>.<span class="fn">min</span>(baseDelay * <span class="num">2</span> ** attempt, maxDelay);
+      <span class="kw">if</span> (jitter) delay *= (<span class="num">0.5</span> + <span class="cls">Math</span>.<span class="fn">random</span>() * <span class="num">0.5</span>);
+
+      console.<span class="fn">warn</span>(<span class="str">\`Attempt \${attempt+1} failed. Retrying in \${~~delay}ms\`</span>);
+      <span class="kw">await new</span> <span class="cls">Promise</span>(res => <span class="fn">setTimeout</span>(res, delay));
+    }
+  }
+  <span class="kw">throw</span> lastError;
+}
+
+<span class="cm">// Playwright usage: wrap flaky API wait</span>
+<span class="fn">test</span>(<span class="str">'Dashboard loads data'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> <span class="fn">retryWithBackoff</span>(
+    <span class="kw">async</span> (attempt) => {
+      console.<span class="fn">log</span>(<span class="str">\`Checking dashboard (attempt \${attempt})\`</span>);
+      <span class="kw">await</span> expect(page.<span class="fn">locator</span>(<span class="str">'.data-table'</span>)).<span class="fn">toBeVisible</span>();
+    },
+    { maxAttempts: <span class="num">4</span>, baseDelay: <span class="num">1000</span> }
+  );
+});`,
+    explanation: `<strong>Exponential backoff</strong> doubles the wait time after each failure (500ms → 1s → 2s → 4s). <strong>Jitter</strong> adds randomness to prevent thundering herd — multiple retrying tests don't all hit the server at the same moment. Playwright has built-in retries but this utility is useful for custom polling logic.`,
+    keyPoints: [
+      "2^attempt gives: 1×, 2×, 4×, 8× delay progression",
+      "Jitter multiplies by random(0.5–1.0) to spread retry storms",
+      "Playwright's expect() auto-retries for 5s by default",
+      "Use for: API polling, custom assertions, DB state checks"
+    ]
+  },
+  {
+    category: "OOP & Patterns",
+    title: "Page Object Model (POM)",
+    difficulty: "medium",
+    tags: ["POM","design-pattern","playwright"],
+    question: "Implement a production-grade Page Object Model for a Login page using ES6 classes. Include constructor, action methods, and assertion methods.",
+    code: `<span class="cm">// Q7: Production-grade Page Object Model</span>
+<span class="kw">class</span> <span class="cls">LoginPage</span> {
+  <span class="cm">/** @param {import('@playwright/test').Page} page */</span>
+  <span class="fn">constructor</span>(page) {
+    <span class="kw">this</span>.page = page;
+    <span class="cm">// Locators — defined once, reused everywhere</span>
+    <span class="kw">this</span>.emailInput    = page.<span class="fn">locator</span>(<span class="str">'[data-testid="email"]'</span>);
+    <span class="kw">this</span>.passwordInput = page.<span class="fn">locator</span>(<span class="str">'[data-testid="password"]'</span>);
+    <span class="kw">this</span>.submitBtn     = page.<span class="fn">locator</span>(<span class="str">'[data-testid="login-btn"]'</span>);
+    <span class="kw">this</span>.errorMsg      = page.<span class="fn">locator</span>(<span class="str">'.error-message'</span>);
+    <span class="kw">this</span>.spinner       = page.<span class="fn">locator</span>(<span class="str">'.loading-spinner'</span>);
+  }
+
+  <span class="kw">async</span> <span class="fn">goto</span>() {
+    <span class="kw">await this</span>.page.<span class="fn">goto</span>(<span class="str">'/login'</span>);
+    <span class="kw">await this</span>.page.<span class="fn">waitForLoadState</span>(<span class="str">'networkidle'</span>);
+  }
+
+  <span class="kw">async</span> <span class="fn">login</span>(email, password) {
+    <span class="kw">await this</span>.emailInput.<span class="fn">fill</span>(email);
+    <span class="kw">await this</span>.passwordInput.<span class="fn">fill</span>(password);
+    <span class="kw">await this</span>.submitBtn.<span class="fn">click</span>();
+    <span class="kw">await this</span>.spinner.<span class="fn">waitFor</span>({ state: <span class="str">'hidden'</span> });
+  }
+
+  <span class="kw">async</span> <span class="fn">assertError</span>(expectedText) {
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="kw">this</span>.errorMsg).<span class="fn">toHaveText</span>(expectedText);
+  }
+
+  <span class="kw">async</span> <span class="fn">assertRedirectedTo</span>(url) {
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="kw">this</span>.page).<span class="fn">toHaveURL</span>(url);
+  }
+}
+
+<span class="cm">// Usage in test</span>
+<span class="fn">test</span>(<span class="str">'Invalid login shows error'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> loginPage = <span class="kw">new</span> <span class="cls">LoginPage</span>(page);
+  <span class="kw">await</span> loginPage.<span class="fn">goto</span>();
+  <span class="kw">await</span> loginPage.<span class="fn">login</span>(<span class="str">'bad@email.com'</span>, <span class="str">'wrong'</span>);
+  <span class="kw">await</span> loginPage.<span class="fn">assertError</span>(<span class="str">'Invalid credentials'</span>);
+});`,
+    explanation: `<strong>POM</strong> encapsulates page-specific selectors and actions. Tests become readable business flows, and selector changes only need fixing in one place. Using <code>data-testid</code> attributes makes locators resilient to CSS/class changes.`,
+    keyPoints: [
+      "Locators defined in constructor — single source of truth",
+      "Never put assertions in page objects — keep them in tests",
+      "Chain pages: LoginPage.login() returns a DashboardPage instance",
+      "Use fixtures to inject page objects into tests automatically"
+    ]
+  },
+  {
+    category: "OOP & Patterns",
+    title: "Builder Pattern for Test Data",
+    difficulty: "hard",
+    tags: ["builder","pattern","fixtures"],
+    question: "Implement a UserBuilder using the Builder pattern to construct test user objects with defaults and overrides. Explain why this is better than factory functions for complex test data.",
+    code: `<span class="cm">// Q8: Builder Pattern for test data construction</span>
+<span class="kw">class</span> <span class="cls">UserBuilder</span> {
+  <span class="fn">constructor</span>() {
+    <span class="cm">// Sensible defaults</span>
+    <span class="kw">this</span>._user = {
+      id:       <span class="fn">crypto</span>.<span class="fn">randomUUID</span>(),
+      name:     <span class="str">'Test User'</span>,
+      email:    <span class="str">\`user+\${<span class="cls">Date</span>.now()}@test.com\`</span>,
+      role:     <span class="str">'viewer'</span>,
+      active:   <span class="kw">true</span>,
+      metadata: {}
+    };
+  }
+
+  <span class="fn">withName</span>(name)       { <span class="kw">this</span>._user.name = name; <span class="kw">return this</span>; }
+  <span class="fn">withEmail</span>(email)     { <span class="kw">this</span>._user.email = email; <span class="kw">return this</span>; }
+  <span class="fn">withRole</span>(role)       { <span class="kw">this</span>._user.role = role; <span class="kw">return this</span>; }
+  <span class="fn">asAdmin</span>()            { <span class="kw">return this</span>.<span class="fn">withRole</span>(<span class="str">'admin'</span>); }
+  <span class="fn">inactive</span>()           { <span class="kw">this</span>._user.active = <span class="kw">false</span>; <span class="kw">return this</span>; }
+  <span class="fn">withMetadata</span>(data)   {
+    <span class="kw">this</span>._user.metadata = { ...<span class="kw">this</span>._user.metadata, ...data };
+    <span class="kw">return this</span>;
+  }
+
+  <span class="fn">build</span>() { <span class="kw">return</span> { ...<span class="kw">this</span>._user }; } <span class="cm">// immutable copy</span>
+}
+
+<span class="cm">// Playwright tests — expressive and minimal</span>
+<span class="fn">test</span>(<span class="str">'Admin can delete users'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> admin = <span class="kw">new</span> <span class="cls">UserBuilder</span>().<span class="fn">asAdmin</span>().<span class="fn">build</span>();
+  <span class="kw">await</span> page.<span class="fn">evaluate</span>(u => <span class="fn">seedUser</span>(u), admin);
+});
+
+<span class="fn">test</span>(<span class="str">'Inactive user sees locked message'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> user = <span class="kw">new</span> <span class="cls">UserBuilder</span>().<span class="fn">inactive</span>().<span class="fn">build</span>();
+  <span class="kw">await</span> page.<span class="fn">evaluate</span>(u => <span class="fn">seedUser</span>(u), user);
+});`,
+    explanation: `<strong>Builder pattern</strong> allows incremental, readable construction of complex objects. Method chaining (<code>.asAdmin().inactive().build()</code>) reads like a specification. Unlike plain object literals, builders enforce defaults and provide named, intent-revealing methods.`,
+    keyPoints: [
+      "Each with*() returns `this` — enables fluent chaining",
+      "build() returns a shallow clone — prevents mutation bugs",
+      "Defaults in constructor = minimal boilerplate in tests",
+      "Extend with: .withPermissions(), .fromTemplate('superadmin')"
+    ]
+  },
+  {
+    category: "Arrays & Functional",
+    title: "Custom Array flatMap",
+    difficulty: "medium",
+    tags: ["arrays","functional","map","filter"],
+    question: "Implement a custom flatMap() function from scratch. Then use it to extract all failed test names from a nested Playwright test result structure.",
+    code: `<span class="cm">// Q9: Custom flatMap + Playwright result parsing</span>
+<span class="kw">function</span> <span class="fn">myFlatMap</span>(array, callback) {
+  <span class="kw">return</span> array.<span class="fn">reduce</span>((acc, item, idx) => {
+    <span class="kw">const</span> result = <span class="fn">callback</span>(item, idx, array);
+    <span class="kw">return</span> acc.<span class="fn">concat</span>(result);
+  }, []);
+}
+
+<span class="cm">// Playwright test results (nested structure)</span>
+<span class="kw">const</span> suites = [
+  {
+    name: <span class="str">'Auth Suite'</span>,
+    tests: [
+      { name: <span class="str">'Login'</span>,  status: <span class="str">'passed'</span> },
+      { name: <span class="str">'Logout'</span>, status: <span class="str">'failed'</span> }
+    ]
+  },
+  {
+    name: <span class="str">'Cart Suite'</span>,
+    tests: [
+      { name: <span class="str">'Add item'</span>,    status: <span class="str">'failed'</span> },
+      { name: <span class="str">'Remove item'</span>, status: <span class="str">'passed'</span> }
+    ]
+  }
+];
+
+<span class="cm">// Extract failed test names using custom flatMap</span>
+<span class="kw">const</span> failedTests = <span class="fn">myFlatMap</span>(suites, suite =>
+  suite.tests
+    .<span class="fn">filter</span>(t => t.status === <span class="str">'failed'</span>)
+    .<span class="fn">map</span>(t => <span class="str">\`\${suite.name} → \${t.name}\`</span>)
+);
+
+console.<span class="fn">log</span>(failedTests);
+<span class="cm">// ['Auth Suite → Logout', 'Cart Suite → Add item']</span>`,
+    explanation: `<strong>flatMap = map + flat(1)</strong>. It maps each element to an array, then flattens one level. This is perfect for processing nested Playwright report structures where each suite contains multiple tests, and you need a single flat list of failures.`,
+    keyPoints: [
+      "flatMap is equivalent to .map(...).flat(1)",
+      "reduce with concat accumulates without intermediate arrays",
+      "Flat(Infinity) for deeply nested; flatMap for one level only",
+      "Playwright JSON reporter outputs this nested structure natively"
+    ]
+  },
+  {
+    category: "Arrays & Functional",
+    title: "Grouping Test Results",
+    difficulty: "medium",
+    tags: ["reduce","groupBy","reporting"],
+    question: "Write a groupBy() utility using Array.reduce(). Use it to group Playwright test results by status (passed/failed/skipped) for a custom reporter.",
+    code: `<span class="cm">// Q10: groupBy using reduce</span>
+<span class="kw">function</span> <span class="fn">groupBy</span>(array, keyFn) {
+  <span class="kw">return</span> array.<span class="fn">reduce</span>((groups, item) => {
+    <span class="kw">const</span> key = <span class="fn">keyFn</span>(item);
+    <span class="kw">if</span> (!groups[key]) groups[key] = [];
+    groups[key].<span class="fn">push</span>(item);
+    <span class="kw">return</span> groups;
+  }, {});
+}
+
+<span class="cm">// Playwright test results</span>
+<span class="kw">const</span> results = [
+  { name: <span class="str">'Login'</span>,      status: <span class="str">'passed'</span>,  duration: <span class="num">1200</span> },
+  { name: <span class="str">'Checkout'</span>,   status: <span class="str">'failed'</span>,  duration: <span class="num">3100</span> },
+  { name: <span class="str">'Profile'</span>,    status: <span class="str">'passed'</span>,  duration: <span class="num">800</span>  },
+  { name: <span class="str">'Admin Panel'</span>, status: <span class="str">'skipped'</span>, duration: <span class="num">0</span>    },
+];
+
+<span class="kw">const</span> grouped = <span class="fn">groupBy</span>(results, r => r.status);
+<span class="cm">/*
+{
+  passed:  [{ name: 'Login' }, { name: 'Profile' }],
+  failed:  [{ name: 'Checkout' }],
+  skipped: [{ name: 'Admin Panel' }]
+}
+*/</span>
+
+<span class="cm">// Summary report</span>
+<span class="kw">const</span> summary = <span class="cls">Object</span>.<span class="fn">entries</span>(grouped).<span class="fn">map</span>(([status, tests]) => ({
+  status,
+  count:       tests.length,
+  avgDuration: tests.<span class="fn">reduce</span>((s, t) => s + t.duration, <span class="num">0</span>) / tests.length
+}));
+
+console.<span class="fn">log</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>(summary, <span class="kw">null</span>, <span class="num">2</span>));`,
+    explanation: `<strong>groupBy with reduce</strong> is the functional alternative to imperative loops. This pattern powers custom Playwright reporters — aggregating test outcomes, calculating pass rates, and generating dashboards. Object.groupBy() is now native in ES2024 but the reduce version works everywhere.`,
+    keyPoints: [
+      "reduce(acc, item) => acc builds up the groups object",
+      "keyFn makes groupBy generic — group by any property",
+      "Object.entries() + map creates summary statistics easily",
+      "Playwright's built-in reporter uses similar aggregation internally"
+    ]
+  },
+  {
+    category: "Error Handling",
+    title: "Custom Error Classes",
+    difficulty: "medium",
+    tags: ["error-handling","classes","OOP"],
+    question: "Create a hierarchy of custom Error classes for a Playwright test framework: TestTimeoutError, ElementNotFoundError, and AssertionError. Include stack preservation and metadata.",
+    code: `<span class="cm">// Q11: Custom error hierarchy for test framework</span>
+<span class="kw">class</span> <span class="cls">PlaywrightTestError</span> <span class="kw">extends</span> <span class="cls">Error</span> {
+  <span class="fn">constructor</span>(message, meta = {}) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.name = <span class="kw">this</span>.constructor.name;
+    <span class="kw">this</span>.meta = meta;
+    <span class="kw">this</span>.timestamp = <span class="kw">new</span> <span class="cls">Date</span>().<span class="fn">toISOString</span>();
+    <span class="cm">// Fix stack for V8</span>
+    <span class="kw">if</span> (<span class="cls">Error</span>.captureStackTrace) {
+      <span class="cls">Error</span>.<span class="fn">captureStackTrace</span>(<span class="kw">this</span>, <span class="kw">this</span>.constructor);
+    }
+  }
+}
+
+<span class="kw">class</span> <span class="cls">TestTimeoutError</span> <span class="kw">extends</span> <span class="cls">PlaywrightTestError</span> {
+  <span class="fn">constructor</span>(action, timeoutMs) {
+    <span class="kw">super</span>(<span class="str">\`Action "\${action}" timed out after \${timeoutMs}ms\`</span>,
+          { action, timeoutMs });
+    <span class="kw">this</span>.timeoutMs = timeoutMs;
+  }
+}
+
+<span class="kw">class</span> <span class="cls">ElementNotFoundError</span> <span class="kw">extends</span> <span class="cls">PlaywrightTestError</span> {
+  <span class="fn">constructor</span>(selector, url) {
+    <span class="kw">super</span>(<span class="str">\`Element "\${selector}" not found on \${url}\`</span>,
+          { selector, url });
+  }
+}
+
+<span class="cm">// Usage in test helper</span>
+<span class="kw">async function</span> <span class="fn">safeClick</span>(page, selector) {
+  <span class="kw">const</span> el = page.<span class="fn">locator</span>(selector);
+  <span class="kw">const</span> count = <span class="kw">await</span> el.<span class="fn">count</span>();
+  <span class="kw">if</span> (count === <span class="num">0</span>) {
+    <span class="kw">throw new</span> <span class="cls">ElementNotFoundError</span>(selector, page.<span class="fn">url</span>());
+  }
+  <span class="kw">await</span> el.<span class="fn">click</span>({ timeout: <span class="num">5000</span> });
+}`,
+    explanation: `<strong>Custom errors</strong> enable precise <code>instanceof</code> checks in catch blocks, carry rich metadata, and produce meaningful stack traces. In CI/CD pipelines, structured error objects can be serialized to JSON for dashboards and alerting systems.`,
+    keyPoints: [
+      "Always set this.name = this.constructor.name for correct logging",
+      "captureStackTrace() removes the error constructor from stack",
+      "Use instanceof checks: if(err instanceof TestTimeoutError)",
+      "Meta object enables structured logging to Datadog/Elastic"
+    ]
+  },
+  {
+    category: "Playwright Specific",
+    title: "Custom Fixture with Teardown",
+    difficulty: "hard",
+    tags: ["fixtures","playwright","setup","teardown"],
+    question: "Create a custom Playwright fixture that seeds a user via API before the test and cleans up via API after. Show proper use of test.extend() with the fixture scope.",
+    code: `<span class="cm">// Q12: Custom Playwright fixture with API setup/teardown</span>
+<span class="kw">import</span> { test <span class="kw">as</span> base, expect } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="kw">export const</span> test = base.<span class="fn">extend</span>({
+  <span class="cm">// 'authenticatedUser' fixture</span>
+  authenticatedUser: <span class="kw">async</span> ({ request }, use) => {
+    <span class="cm">// ---- SETUP ----</span>
+    <span class="kw">const</span> createRes = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/test-users'</span>, {
+      data: { name: <span class="str">'Test Alice'</span>, role: <span class="str">'editor'</span> }
+    });
+    <span class="fn">expect</span>(createRes).<span class="fn">toBeOK</span>();
+    <span class="kw">const</span> user = <span class="kw">await</span> createRes.<span class="fn">json</span>();
+
+    <span class="cm">// ---- YIELD to test ----</span>
+    <span class="kw">await</span> <span class="fn">use</span>(user);
+
+    <span class="cm">// ---- TEARDOWN (always runs) ----</span>
+    <span class="kw">await</span> request.<span class="fn">delete</span>(<span class="str">\`/api/test-users/\${user.id}\`</span>);
+    console.<span class="fn">log</span>(<span class="str">\`Cleaned up user \${user.id}\`</span>);
+  },
+
+  <span class="cm">// Composed: page logged in as the test user</span>
+  loggedInPage: <span class="kw">async</span> ({ page, authenticatedUser }, use) => {
+    <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">\`/login?token=\${authenticatedUser.token}\`</span>);
+    <span class="kw">await</span> page.<span class="fn">waitForURL</span>(<span class="str">'/dashboard'</span>);
+    <span class="kw">await</span> <span class="fn">use</span>(page);
+  }
+});
+
+<span class="cm">// Clean, readable test using composed fixture</span>
+<span class="fn">test</span>(<span class="str">'Editor can edit articles'</span>,
+  <span class="kw">async</span> ({ loggedInPage, authenticatedUser }) => {
+    <span class="kw">await</span> loggedInPage.<span class="fn">click</span>(<span class="str">'text=New Article'</span>);
+    <span class="kw">await</span> <span class="fn">expect</span>(loggedInPage.<span class="fn">locator</span>(<span class="str">'h1'</span>))
+      .<span class="fn">toHaveText</span>(<span class="str">'New Article'</span>);
+});`,
+    explanation: `<strong>Playwright fixtures</strong> use <code>use(value)</code> as a yield point — setup runs before, teardown after. They compose via dependency injection and auto-handle scope (test/worker/project). This keeps tests clean and guarantees cleanup even on failure.`,
+    keyPoints: [
+      "Code before use() = setup; code after = teardown",
+      "Teardown runs even if the test fails (like try/finally)",
+      "Fixtures compose: loggedInPage depends on authenticatedUser",
+      "scope: 'worker' shares fixture across all tests in a worker"
+    ]
+  },
+  {
+    category: "Playwright Specific",
+    title: "Intercept & Mock API Responses",
+    difficulty: "medium",
+    tags: ["route","mock","network","playwright"],
+    question: "Write Playwright tests that mock API responses using page.route(). Cover: success response, error state (500), loading state, and partial data interception.",
+    code: `<span class="cm">// Q13: Network interception patterns</span>
+
+<span class="cm">// 1. Mock success response</span>
+<span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/users'</span>, route =>
+  route.<span class="fn">fulfill</span>({
+    status: <span class="num">200</span>,
+    contentType: <span class="str">'application/json'</span>,
+    body: <span class="cls">JSON</span>.<span class="fn">stringify</span>([{ id: <span class="num">1</span>, name: <span class="str">'Alice'</span> }])
+  })
+);
+
+<span class="cm">// 2. Mock server error</span>
+<span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/orders'</span>, route =>
+  route.<span class="fn">fulfill</span>({ status: <span class="num">500</span>, body: <span class="str">'Internal Server Error'</span> })
+);
+
+<span class="cm">// 3. Delay to test loading states</span>
+<span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/slow-data'</span>, <span class="kw">async</span> route => {
+  <span class="kw">await new</span> <span class="cls">Promise</span>(r => <span class="fn">setTimeout</span>(r, <span class="num">2000</span>)); <span class="cm">// 2s delay</span>
+  <span class="kw">await</span> route.<span class="fn">fulfill</span>({ status: <span class="num">200</span>, body: <span class="str">'{"data": []}'</span> });
+});
+
+<span class="cm">// 4. Intercept & modify real response</span>
+<span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/products'</span>, <span class="kw">async</span> route => {
+  <span class="kw">const</span> response = <span class="kw">await</span> route.<span class="fn">fetch</span>(); <span class="cm">// real request</span>
+  <span class="kw">const</span> json = <span class="kw">await</span> response.<span class="fn">json</span>();
+  json.products.<span class="fn">push</span>({ id: <span class="num">999</span>, name: <span class="str">'INJECTED'</span> }); <span class="cm">// modify</span>
+  <span class="kw">await</span> route.<span class="fn">fulfill</span>({ json });
+});
+
+<span class="cm">// 5. Abort specific requests (ads, analytics)</span>
+<span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/*.{png,jpg,gif}'</span>, route => route.<span class="fn">abort</span>());`,
+    explanation: `<strong>page.route()</strong> intercepts at the browser level before requests leave. This enables deterministic tests by removing external dependencies. The fetch+fulfill pattern (interception) lets you modify real responses — useful for edge case testing without backend changes.`,
+    keyPoints: [
+      "route.fulfill() — mock response; route.abort() — block request",
+      "route.fetch() — make the real request, then modify response",
+      "Glob patterns: **/api/** or regex /\\/api\\/users\\/\\d+/",
+      "page.unroute() to restore real network in later test steps"
+    ]
+  },
+  {
+    category: "Playwright Specific",
+    title: "Parallel Workers & SharedState",
+    difficulty: "hard",
+    tags: ["parallelism","workers","globalSetup"],
+    question: "Explain and implement global setup in Playwright to authenticate once, save state, and reuse auth across parallel workers using storageState.",
+    code: `<span class="cm">// Q14: Global auth setup + storageState reuse</span>
+
+<span class="cm">// global-setup.ts</span>
+<span class="kw">import</span> { chromium } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+<span class="kw">import</span> path <span class="kw">from</span> <span class="str">'path'</span>;
+
+<span class="kw">export const</span> AUTH_FILE = path.<span class="fn">join</span>(__dirname, <span class="str">'.auth/user.json'</span>);
+
+<span class="kw">export default async function</span> <span class="fn">globalSetup</span>() {
+  <span class="kw">const</span> browser = <span class="kw">await</span> chromium.<span class="fn">launch</span>();
+  <span class="kw">const</span> page    = <span class="kw">await</span> browser.<span class="fn">newPage</span>();
+
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://app.example.com/login'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#email'</span>,    process.env.TEST_EMAIL);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#password'</span>, process.env.TEST_PASS);
+  <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'[type=submit]'</span>);
+  <span class="kw">await</span> page.<span class="fn">waitForURL</span>(<span class="str">'/dashboard'</span>);
+
+  <span class="cm">// Save: cookies + localStorage + sessionStorage</span>
+  <span class="kw">await</span> page.context().<span class="fn">storageState</span>({ path: AUTH_FILE });
+  <span class="kw">await</span> browser.<span class="fn">close</span>();
+}
+
+<span class="cm">// playwright.config.ts</span>
+<span class="kw">export default</span> {
+  globalSetup: <span class="str">'./global-setup'</span>,
+  projects: [{
+    name: <span class="str">'authenticated'</span>,
+    use: { storageState: AUTH_FILE } <span class="cm">// reused by ALL workers</span>
+  }]
+};
+
+<span class="cm">// Test — already authenticated, no login needed</span>
+<span class="fn">test</span>(<span class="str">'Dashboard visible'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/dashboard'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'h1'</span>)).<span class="fn">toBeVisible</span>();
+});`,
+    explanation: `<strong>globalSetup</strong> runs once before all workers start. Saving <code>storageState</code> (cookies + localStorage) to a JSON file allows all parallel workers to reuse the authenticated session without logging in repeatedly — dramatically reducing CI runtime.`,
+    keyPoints: [
+      "globalSetup runs once; globalTeardown for cleanup",
+      "storageState captures: cookies, localStorage, sessionStorage",
+      "Store auth files in .auth/ directory, gitignore them",
+      "Use multiple projects for different auth roles (admin, viewer)"
+    ]
+  },
+  {
+    category: "Data Structures",
+    title: "LRU Cache for Locator Caching",
+    difficulty: "hard",
+    tags: ["LRU","cache","Map","performance"],
+    question: "Implement an LRU (Least Recently Used) Cache using Map. Explain how caching Playwright locators or API responses can speed up test suites.",
+    code: `<span class="cm">// Q15: LRU Cache implementation</span>
+<span class="kw">class</span> <span class="cls">LRUCache</span> {
+  <span class="fn">constructor</span>(capacity) {
+    <span class="kw">this</span>.capacity = capacity;
+    <span class="kw">this</span>.cache = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cm">// Map preserves insertion order</span>
+  }
+
+  <span class="fn">get</span>(key) {
+    <span class="kw">if</span> (!<span class="kw">this</span>.cache.<span class="fn">has</span>(key)) <span class="kw">return</span> -<span class="num">1</span>;
+    <span class="cm">// Move to end (most recently used)</span>
+    <span class="kw">const</span> value = <span class="kw">this</span>.cache.<span class="fn">get</span>(key);
+    <span class="kw">this</span>.cache.<span class="fn">delete</span>(key);
+    <span class="kw">this</span>.cache.<span class="fn">set</span>(key, value);
+    <span class="kw">return</span> value;
+  }
+
+  <span class="fn">put</span>(key, value) {
+    <span class="kw">if</span> (<span class="kw">this</span>.cache.<span class="fn">has</span>(key)) <span class="kw">this</span>.cache.<span class="fn">delete</span>(key);
+    <span class="kw">else if</span> (<span class="kw">this</span>.cache.size >= <span class="kw">this</span>.capacity) {
+      <span class="cm">// Evict LRU: first key in Map</span>
+      <span class="kw">const</span> lruKey = <span class="kw">this</span>.cache.keys().<span class="fn">next</span>().value;
+      <span class="kw">this</span>.cache.<span class="fn">delete</span>(lruKey);
+    }
+    <span class="kw">this</span>.cache.<span class="fn">set</span>(key, value);
+  }
+
+  <span class="fn">size</span>() { <span class="kw">return this</span>.cache.size; }
+}
+
+<span class="cm">// Playwright: cache API test data to avoid repeated DB hits</span>
+<span class="kw">const</span> apiCache = <span class="kw">new</span> <span class="cls">LRUCache</span>(<span class="num">50</span>);
+
+<span class="kw">async function</span> <span class="fn">getCachedUser</span>(request, userId) {
+  <span class="kw">let</span> user = apiCache.<span class="fn">get</span>(userId);
+  <span class="kw">if</span> (user === -<span class="num">1</span>) {
+    <span class="kw">const</span> res = <span class="kw">await</span> request.<span class="fn">get</span>(<span class="str">\`/api/users/\${userId}\`</span>);
+    user = <span class="kw">await</span> res.<span class="fn">json</span>();
+    apiCache.<span class="fn">put</span>(userId, user);
+  }
+  <span class="kw">return</span> user;
+}`,
+    explanation: `<strong>LRU Cache</strong> evicts the least-recently-used entry when full. JavaScript's Map preserves insertion order, making the first key always the oldest. In test frameworks, caching lookup responses (users, products) in memory avoids redundant API calls across tests running in the same worker.`,
+    keyPoints: [
+      "Map.keys().next().value = first (least recently used) key",
+      "delete + set re-inserts at end = marks as most recently used",
+      "O(1) get and put — no sorting needed",
+      "In Playwright workers: cache persists for worker lifetime only"
+    ]
+  },
+  {
+    category: "Data Structures",
+    title: "Event Emitter from Scratch",
+    difficulty: "hard",
+    tags: ["EventEmitter","pub-sub","patterns"],
+    question: "Implement a custom EventEmitter class with on(), off(), once(), and emit() methods. Show how it can be used to build a Playwright test reporter.",
+    code: `<span class="cm">// Q16: EventEmitter implementation</span>
+<span class="kw">class</span> <span class="cls">EventEmitter</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>._events = <span class="kw">new</span> <span class="cls">Map</span>();
+  }
+
+  <span class="fn">on</span>(event, listener) {
+    <span class="kw">if</span> (!<span class="kw">this</span>._events.<span class="fn">has</span>(event)) {
+      <span class="kw">this</span>._events.<span class="fn">set</span>(event, []);
+    }
+    <span class="kw">this</span>._events.<span class="fn">get</span>(event).<span class="fn">push</span>(listener);
+    <span class="kw">return this</span>; <span class="cm">// chainable</span>
+  }
+
+  <span class="fn">off</span>(event, listener) {
+    <span class="kw">const</span> listeners = <span class="kw">this</span>._events.<span class="fn">get</span>(event) ?? [];
+    <span class="kw">this</span>._events.<span class="fn">set</span>(event,
+      listeners.<span class="fn">filter</span>(l => l !== listener)
+    );
+    <span class="kw">return this</span>;
+  }
+
+  <span class="fn">once</span>(event, listener) {
+    <span class="kw">const</span> wrapper = (...args) => {
+      listener(...args);
+      <span class="kw">this</span>.<span class="fn">off</span>(event, wrapper); <span class="cm">// auto-remove</span>
+    };
+    <span class="kw">return this</span>.<span class="fn">on</span>(event, wrapper);
+  }
+
+  <span class="fn">emit</span>(event, ...args) {
+    (<span class="kw">this</span>._events.<span class="fn">get</span>(event) ?? [])
+      .<span class="fn">forEach</span>(fn => <span class="fn">fn</span>(...args));
+    <span class="kw">return this</span>;
+  }
+}
+
+<span class="cm">// Playwright custom reporter using EventEmitter</span>
+<span class="kw">const</span> reporter = <span class="kw">new</span> <span class="cls">EventEmitter</span>();
+
+reporter
+  .<span class="fn">on</span>(<span class="str">'test:pass'</span>, ({ name }) => console.<span class="fn">log</span>(<span class="str">\`✅ \${name}\`</span>))
+  .<span class="fn">on</span>(<span class="str">'test:fail'</span>, ({ name, err }) => {
+    console.<span class="fn">error</span>(<span class="str">\`❌ \${name}:\`</span>, err.message);
+    <span class="fn">sendSlackAlert</span>(name, err); <span class="cm">// your custom function</span>
+  });
+
+<span class="cm">// Emit from Playwright test hooks</span>
+<span class="fn">test</span>.<span class="fn">afterEach</span>(<span class="kw">async</span> ({}, testInfo) => {
+  <span class="kw">const</span> event = testInfo.status === <span class="str">'passed'</span>
+    ? <span class="str">'test:pass'</span> : <span class="str">'test:fail'</span>;
+  reporter.<span class="fn">emit</span>(event, { name: testInfo.title, err: testInfo.error });
+});`,
+    explanation: `<strong>EventEmitter</strong> decouples producers (test lifecycle) from consumers (reporters, alerters). The <code>once()</code> pattern uses a self-removing wrapper — crucial for one-time notifications like "first test failure" alerts in CI pipelines.`,
+    keyPoints: [
+      "once() wraps listener and calls off() after first invocation",
+      "Chaining works because on/off/emit return `this`",
+      "Playwright's built-in reporter interface is event-based",
+      "Use Symbol as event name for namespace collision safety"
+    ]
+  },
+  {
+    category: "TypeScript / JS Advanced",
+    title: "Generic Typed API Helper",
+    difficulty: "hard",
+    tags: ["generics","TypeScript","API"],
+    question: "Write a generic TypeScript API helper function for Playwright's APIRequestContext that returns typed responses and handles errors uniformly.",
+    code: `<span class="cm">// Q17: Generic typed API helper (TypeScript)</span>
+<span class="kw">import type</span> { <span class="cls">APIRequestContext</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="kw">interface</span> <span class="cls">ApiOptions</span> {
+  headers?: <span class="cls">Record</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;;
+  timeout?: <span class="kw">number</span>;
+}
+
+<span class="kw">async function</span> <span class="fn">apiGet</span>&lt;<span class="cls">T</span>&gt;(
+  request: <span class="cls">APIRequestContext</span>,
+  endpoint: <span class="kw">string</span>,
+  options: <span class="cls">ApiOptions</span> = {}
+): <span class="cls">Promise</span>&lt;<span class="cls">T</span>&gt; {
+  <span class="kw">const</span> response = <span class="kw">await</span> request.<span class="fn">get</span>(endpoint, {
+    headers: { <span class="str">'Accept'</span>: <span class="str">'application/json'</span>, ...options.headers },
+    timeout: options.timeout ?? <span class="num">10_000</span>
+  });
+
+  <span class="kw">if</span> (!response.<span class="fn">ok</span>()) {
+    <span class="kw">const</span> body = <span class="kw">await</span> response.<span class="fn">text</span>();
+    <span class="kw">throw new</span> <span class="cls">Error</span>(
+      <span class="str">\`GET \${endpoint} failed \${response.status()}: \${body}\`</span>
+    );
+  }
+
+  <span class="kw">return</span> response.<span class="fn">json</span>() <span class="kw">as</span> <span class="cls">Promise</span>&lt;<span class="cls">T</span>&gt;;
+}
+
+<span class="cm">// Strongly-typed usage</span>
+<span class="kw">interface</span> <span class="cls">User</span> { id: <span class="kw">number</span>; name: <span class="kw">string</span>; email: <span class="kw">string</span>; }
+
+<span class="fn">test</span>(<span class="str">'User API returns correct shape'</span>, <span class="kw">async</span> ({ request }) => {
+  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">apiGet</span>&lt;<span class="cls">User</span>&gt;(request, <span class="str">'/api/users/1'</span>);
+  <span class="cm">// TypeScript knows: user.id, user.name, user.email</span>
+  <span class="fn">expect</span>(user.name).<span class="fn">toBeDefined</span>();
+  <span class="fn">expect</span>(<span class="kw">typeof</span> user.id).<span class="fn">toBe</span>(<span class="str">'number'</span>);
+});`,
+    explanation: `<strong>Generics</strong> (<code>&lt;T&gt;</code>) allow functions to be type-safe without being specific. The caller decides what type to expect — the helper handles all HTTP plumbing. This eliminates runtime type surprises and provides IDE autocomplete for API response shapes.`,
+    keyPoints: [
+      "T is inferred from the call site: apiGet<User>() → returns User",
+      "response.ok() checks status 200-299 uniformly",
+      "Centralized error throwing = single place to add logging",
+      "Extend with apiPost<Req, Res>, apiDelete<T> similarly"
+    ]
+  },
+  {
+    category: "TypeScript / JS Advanced",
+    title: "Currying & Partial Application",
+    difficulty: "medium",
+    tags: ["currying","functional","closures"],
+    question: "Implement a curry() function and use partial application to create reusable Playwright assertion helpers.",
+    code: `<span class="cm">// Q18: Curry function + Playwright assertion helpers</span>
+<span class="kw">function</span> <span class="fn">curry</span>(fn) {
+  <span class="kw">return function</span> <span class="fn">curried</span>(...args) {
+    <span class="kw">if</span> (args.length >= fn.length) {
+      <span class="kw">return</span> fn.<span class="fn">apply</span>(<span class="kw">this</span>, args);
+    }
+    <span class="kw">return function</span>(...moreArgs) {
+      <span class="kw">return</span> <span class="fn">curried</span>.<span class="fn">apply</span>(<span class="kw">this</span>, args.<span class="fn">concat</span>(moreArgs));
+    };
+  };
+}
+
+<span class="cm">// Base assertion: (page, selector, expectedText) => Promise</span>
+<span class="kw">const</span> assertText = <span class="fn">curry</span>(
+  <span class="kw">async</span> (page, selector, expected) => {
+    <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(selector)).<span class="fn">toHaveText</span>(expected);
+  }
+);
+
+<span class="cm">// Partially apply page → reusable per-test helper</span>
+<span class="kw">test</span>(<span class="str">'Homepage content'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> assertPageText = <span class="fn">assertText</span>(page); <span class="cm">// partial: page locked</span>
+
+  <span class="kw">await</span> <span class="fn">assertPageText</span>(<span class="str">'h1'</span>, <span class="str">'Welcome'</span>);
+  <span class="kw">await</span> <span class="fn">assertPageText</span>(<span class="str">'.subtitle'</span>, <span class="str">'Build fast'</span>);
+  <span class="kw">await</span> <span class="fn">assertPageText</span>(<span class="str">'footer'</span>, <span class="str">'© 2025'</span>);
+  <span class="cm">// vs: await assertText(page, 'h1', 'Welcome'); (repetitive)</span>
+});
+
+<span class="cm">// Also useful: partial selector, vary the assertion target</span>
+<span class="kw">const</span> assertH1 = <span class="fn">assertText</span>(page)(<span class="str">'h1'</span>); <span class="cm">// page + selector fixed</span>
+<span class="kw">await</span> <span class="fn">assertH1</span>(<span class="str">'Welcome'</span>); <span class="cm">// just provide expected text</span>`,
+    explanation: `<strong>Currying</strong> transforms <code>f(a, b, c)</code> into <code>f(a)(b)(c)</code>, enabling partial application. Locking in <code>page</code> first creates a per-test assertion helper with less repetition. This functional pattern complements Playwright's fluent API style.`,
+    keyPoints: [
+      "fn.length = arity (number of declared parameters)",
+      "Partial application = calling curry with fewer args than arity",
+      "Curried functions compose naturally: assertH1 = assertText(page)('h1')",
+      "Lodash _.curry() works the same way if needed"
+    ]
+  },
+  {
+    category: "Performance",
+    title: "Memoization for Test Helpers",
+    difficulty: "medium",
+    tags: ["memoization","performance","cache"],
+    question: "Write a memoize() function and apply it to cache expensive Playwright selector evaluations or repeated API lookups within a test session.",
+    code: `<span class="cm">// Q19: Memoize with Map (supports non-primitive keys)</span>
+<span class="kw">function</span> <span class="fn">memoize</span>(fn, keyFn = (...args) => <span class="cls">JSON</span>.<span class="fn">stringify</span>(args)) {
+  <span class="kw">const</span> cache = <span class="kw">new</span> <span class="cls">Map</span>();
+
+  <span class="kw">return async function</span>(...args) {
+    <span class="kw">const</span> key = <span class="fn">keyFn</span>(...args);
+    <span class="kw">if</span> (cache.<span class="fn">has</span>(key)) {
+      console.<span class="fn">log</span>(<span class="str">'[cache hit]'</span>, key);
+      <span class="kw">return</span> cache.<span class="fn">get</span>(key);
+    }
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">fn</span>(...args);
+    cache.<span class="fn">set</span>(key, result);
+    <span class="kw">return</span> result;
+  };
+}
+
+<span class="cm">// Cache expensive: count elements matching selector</span>
+<span class="kw">const</span> memoizedCount = <span class="fn">memoize</span>(
+  <span class="kw">async</span> (page, selector) => page.<span class="fn">locator</span>(selector).<span class="fn">count</span>()
+);
+
+<span class="fn">test</span>(<span class="str">'Product page counts'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/products'</span>);
+  <span class="cm">// First call: hits DOM</span>
+  <span class="kw">const</span> count1 = <span class="kw">await</span> <span class="fn">memoizedCount</span>(page, <span class="str">'.product-card'</span>);
+  <span class="cm">// Second call: returns from cache instantly</span>
+  <span class="kw">const</span> count2 = <span class="kw">await</span> <span class="fn">memoizedCount</span>(page, <span class="str">'.product-card'</span>);
+  <span class="fn">expect</span>(count1).<span class="fn">toBe</span>(count2);
+});
+
+<span class="cm">// ⚠️ Only memoize PURE (deterministic) operations</span>
+<span class="cm">// Don't memoize: click(), fill(), navigate()</span>`,
+    explanation: `<strong>Memoization</strong> caches return values by input arguments. Applied to Playwright, it avoids repeated DOM queries for stable data (element counts, attribute values) within a test. The custom <code>keyFn</code> allows control over cache key serialization.`,
+    keyPoints: [
+      "JSON.stringify(args) works for primitives; custom keyFn for objects",
+      "Only memoize pure, side-effect-free functions",
+      "Never memoize: click, fill, navigate, or any state-mutating action",
+      "Clear cache between tests if functions close over DOM state"
+    ]
+  },
+  {
+    category: "Performance",
+    title: "Pipeline / Function Composition",
+    difficulty: "hard",
+    tags: ["compose","pipe","functional"],
+    question: "Implement pipe() and compose() for function composition. Build a Playwright test data transformation pipeline using these utilities.",
+    code: `<span class="cm">// Q20: pipe() and compose() implementation</span>
+
+<span class="cm">// pipe: left → right (f, then g, then h)</span>
+<span class="kw">const</span> pipe = (...fns) => x => fns.<span class="fn">reduce</span>((v, f) => <span class="fn">f</span>(v), x);
+
+<span class="cm">// compose: right → left (mathematical convention)</span>
+<span class="kw">const</span> compose = (...fns) => x => fns.<span class="fn">reduceRight</span>((v, f) => <span class="fn">f</span>(v), x);
+
+<span class="cm">// Test data transformations</span>
+<span class="kw">const</span> trimFields     = obj => <span class="cls">Object</span>.<span class="fn">fromEntries</span>(
+  <span class="cls">Object</span>.<span class="fn">entries</span>(obj).<span class="fn">map</span>(([k, v]) => [k, <span class="kw">typeof</span> v === <span class="str">'string'</span> ? v.<span class="fn">trim</span>() : v])
+);
+<span class="kw">const</span> lowercaseEmail = obj => ({ ...obj, email: obj.email?.<span class="fn">toLowerCase</span>() });
+<span class="kw">const</span> addDefaults    = obj => ({ active: <span class="kw">true</span>, role: <span class="str">'viewer'</span>, ...obj });
+<span class="kw">const</span> validateUser   = obj => {
+  <span class="kw">if</span> (!obj.email?.<span class="fn">includes</span>(<span class="str">'@'</span>)) <span class="kw">throw new</span> <span class="cls">Error</span>(<span class="str">'Invalid email'</span>);
+  <span class="kw">return</span> obj;
+};
+
+<span class="kw">const</span> processUser = <span class="fn">pipe</span>(
+  trimFields, lowercaseEmail, addDefaults, validateUser
+);
+
+<span class="cm">// Playwright: process raw form data before seeding</span>
+<span class="fn">test</span>(<span class="str">'Form submission normalizes data'</span>, <span class="kw">async</span> ({ page, request }) => {
+  <span class="kw">const</span> rawInput = { name: <span class="str">'  Alice  '</span>, email: <span class="str">'ALICE@TEST.COM'</span> };
+  <span class="kw">const</span> processed = <span class="fn">processUser</span>(rawInput);
+  <span class="cm">// { name: 'Alice', email: 'alice@test.com', active: true, role: 'viewer' }</span>
+
+  <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/users'</span>, { data: processed });
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/users'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">\`text=\${processed.name}\`</span>)).<span class="fn">toBeVisible</span>();
+});`,
+    explanation: `<strong>pipe()</strong> threads a value through a sequence of functions left-to-right — each function receives the previous output. This builds declarative data transformation pipelines. In Playwright test suites, this pattern cleanly normalizes and validates test data before API seeding.`,
+    keyPoints: [
+      "pipe = reduce with initial value; compose = reduceRight",
+      "Each function must: accept one arg, return transformed value",
+      "validateUser throws — pipe propagates errors naturally",
+      "Async pipe: use async reduce with await for async transforms"
+    ]
+  }
+];
+
+const categories = ["All", ...new Set(questions.map(q => q.category))];
+
+let activeCategory = "All";
+let activeIndex = 0;
+let revealedSet = new Set();
+
+function filteredQuestions() {
+  return activeCategory === "All"
+    ? questions
+    : questions.filter(q => q.category === activeCategory);
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = categories.map(cat => `
+    <button class="tab ${cat === activeCategory ? 'active' : ''}"
+      onclick="setCategory('${cat}')">${cat}</button>
+  `).join('');
+}
+
+function renderList() {
+  const list = document.getElementById('qList');
+  const fq = filteredQuestions();
+  list.innerHTML = fq.map((q, i) => `
+    <div class="q-item ${i === activeIndex ? 'active' : ''}" onclick="selectQ(${i})">
+      <div class="q-num">Q${questions.indexOf(q)+1}</div>
+      <div class="q-title">${q.title}</div>
+      <div class="q-difficulty diff-${q.difficulty}">${q.difficulty}</div>
+    </div>
+  `).join('');
+  updateProgress();
+}
+
+function renderDetail() {
+  const fq = filteredQuestions();
+  const q = fq[activeIndex];
+  if (!q) return;
+  const qIndex = questions.indexOf(q);
+  const revealed = revealedSet.has(qIndex);
+  const detail = document.getElementById('qDetail');
+  detail.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-title">${q.title}</div>
+      <div class="q-difficulty diff-${q.difficulty}">${q.difficulty}</div>
+    </div>
+    <div class="tags">
+      ${q.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+      <span class="tag">${q.category}</span>
+    </div>
+    <div class="section-label">Question</div>
+    <div class="question-text">${q.question}</div>
+    <div class="section-label">Your Answer / Solution Code</div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(${qIndex})">Copy</button>
+      </div>
+      <pre id="code-${qIndex}">${q.code}</pre>
+    </div>
+    ${!revealed ? `
+      <button class="reveal-btn" onclick="revealSolution(${qIndex})">
+        ▶ Reveal Explanation & Key Points
+      </button>
+    ` : ''}
+    <div class="solution-block ${revealed ? 'visible' : ''}" id="sol-${qIndex}">
+      <div class="section-label">Explanation</div>
+      <div class="explanation">${q.explanation}</div>
+      <div class="key-points">
+        <h4>⚡ Key Interview Points</h4>
+        <ul>${q.keyPoints.map(p => `<li>${p}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="prevQ()" ${activeIndex === 0 ? 'disabled' : ''}>← Prev</button>
+      <button class="nav-btn" onclick="nextQ()" ${activeIndex === fq.length-1 ? 'disabled' : ''}>Next →</button>
+    </div>
+  `;
+}
+
+function updateProgress() {
+  const fq = filteredQuestions();
+  const total = fq.length;
+  const current = activeIndex + 1;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-label').textContent = `Question ${current} of ${total}`;
+  document.getElementById('prog-pct').textContent = `${pct}%`;
+  document.getElementById('prog-fill').style.width = `${pct}%`;
+}
+
+function setCategory(cat) {
+  activeCategory = cat;
+  activeIndex = 0;
+  renderTabs();
+  renderList();
+  renderDetail();
+}
+
+function selectQ(i) {
+  activeIndex = i;
+  renderList();
+  renderDetail();
+}
+
+function prevQ() {
+  if (activeIndex > 0) { activeIndex--; renderList(); renderDetail(); }
+}
+
+function nextQ() {
+  const fq = filteredQuestions();
+  if (activeIndex < fq.length - 1) { activeIndex++; renderList(); renderDetail(); }
+}
+
+function revealSolution(qIndex) {
+  revealedSet.add(qIndex);
+  renderDetail();
+}
+
+function copyCode(qIndex) {
+  const el = document.getElementById(`code-${qIndex}`);
+  const text = el ? el.innerText : '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); }
+  });
+}
+
+// Init
+renderTabs();
+renderList();
+renderDetail();
+</script>
+</body>
+</html>
